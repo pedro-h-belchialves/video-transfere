@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "queue": "node queue/worker.js"
+    "remove:all": "node filter-errors.js",
+    "verify:all": "node progress.js",
+    "queue": "node queue/worker.js",
+    "queue:download": "node queue/worker.download.js"
   },
   "keywords": [],
   "author": "",

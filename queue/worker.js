@@ -55,9 +55,8 @@ new Worker(
             fs.unlinkSync(path.join(tmpDir, file), { force: true })
           );
           fs.rmSync(tmpDir, { recursive: true, force: true });
-        }, 5000);
+        }, 15000);
 
-        console.log("Chamou aqui ");
         const { data } = await axios.get(masterUrl, {
           timeout: 5000,
           responseType: "text",
@@ -159,6 +158,7 @@ new Worker(
           );
           Logger.log(`Deleting temp files...`);
 
+          createUploadingVideoList(videoId);
           fs.readdirSync(tmpDir).forEach((file) =>
             fs.unlinkSync(path.join(tmpDir, file), { force: true })
           );
@@ -200,4 +200,34 @@ function logErrorToFile(videoId) {
   } catch (fileErr) {
     console.error("Erro ao escrever no arquivo de log de erros:", fileErr);
   }
+}
+
+function createUploadingVideoList(videoId) {
+  const progressFile = path.resolve(__dirname, "..", "progress.txt");
+
+  // 1. Cria o arquivo se ele não existe
+  if (!fs.existsSync(progressFile)) {
+    fs.writeFileSync(progressFile, JSON.stringify([]));
+  }
+
+  // 2. Lê o conteúdo atual do arquivo
+  const fileContent = fs.readFileSync(progressFile, "utf-8");
+
+  // 3. Faz o parse do conteúdo para um array
+  let videoList = [];
+  try {
+    videoList = JSON.parse(fileContent);
+  } catch (err) {
+    // Se o conteúdo não for um array válido, recomeça com array vazio
+    console.error("Erro ao fazer parse de progress.txt. Resetando arquivo.");
+    videoList = [];
+  }
+
+  // 4. Adiciona o novo ID se ainda não estiver presente
+  if (!videoList.includes(videoId)) {
+    videoList.push(videoId);
+  }
+
+  // 5. Escreve de volta no arquivo
+  fs.writeFileSync(progressFile, JSON.stringify(videoList, null, 2));
 }
